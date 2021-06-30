@@ -16,7 +16,7 @@ import static com.codeborne.selenide.Selenide.*;
 public class CardDeliveryTest {
 
     @Test
-    public void cardDeliverySuccess() throws InterruptedException {
+    public void cardDeliverySuccess()  {
         open("http://0.0.0.0:9999");
         $("[data-test-id='city'] .input__control")
                 .setValue("Москва");
@@ -25,16 +25,7 @@ public class CardDeliveryTest {
                 .click();
         String date  = LocalDate.now().plusDays(4).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         $("[data-test-id='date'] span input").click();
-        $("[data-test-id='date'] span input").sendKeys(Keys.chord(
-                Keys.BACK_SPACE,
-                Keys.BACK_SPACE,
-                Keys.BACK_SPACE,
-                Keys.BACK_SPACE,
-                Keys.BACK_SPACE,
-                Keys.BACK_SPACE,
-                Keys.BACK_SPACE,
-                Keys.BACK_SPACE)
-        );
+        $("[data-test-id='date'] span input").doubleClick().sendKeys(Keys.BACK_SPACE);
         $("[data-test-id='date'] span input").setValue(date);
         $("[data-test-id='date'] span").click();
 
@@ -57,17 +48,22 @@ public class CardDeliveryTest {
 
 
     @Test
-    public void cardDeliveryComplexSuccess() throws InterruptedException {
+    public void cardDeliveryComplexSuccess() {
         open("http://0.0.0.0:9999");
         $("[data-test-id='city'] .input__control")
                 .setValue("Мо");
         $$("span.menu-item__control")
                 .findBy(text("Москва")).click();
         $("[data-test-id='date'] span").click();
-        Long dateInMills  = Long.valueOf($("td.calendar__day_state_current").getAttribute("data-day"));
+        long dateInMills  = Long.valueOf($("td.calendar__day_state_current").getAttribute("data-day"));
         LocalDate date = LocalDate.ofEpochDay(dateInMills / 86400000L);
-        Long selectedDateInMills =  date.plusDays(7).atTime(LocalTime.MIDNIGHT).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+        int currentMonth = date.getMonthValue();
+        long selectedDateInMills =  date.plusDays(7).atTime(LocalTime.MIDNIGHT).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
         String selectedDate = date.plusDays(7).format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        int nextMonth = date.plusDays(7).getMonthValue();
+        if (nextMonth > currentMonth) {
+           $("div.calendar__arrow_direction_right").click();
+        }
         $("td[data-day='" + selectedDateInMills + "']").click();
         $("[data-test-id='name'] .input__control")
                 .setValue("Иванова Александра");
